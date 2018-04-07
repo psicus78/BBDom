@@ -53,7 +53,9 @@ namespace BBDom.Data.Migrations
                 {
                     Address = table.Column<string>(type: "TEXT", nullable: false),
                     DPT = table.Column<int>(type: "INTEGER", nullable: true),
-                    Name = table.Column<string>(type: "TEXT", nullable: true)
+                    Name = table.Column<string>(type: "TEXT", nullable: true),
+                    Read = table.Column<bool>(type: "INTEGER", nullable: false),
+                    Write = table.Column<bool>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -218,6 +220,11 @@ namespace BBDom.Data.Migrations
                 table: "AspNetUsers",
                 column: "NormalizedUserName",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_KnxStates_Address",
+                table: "KnxStates",
+                column: "Address");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

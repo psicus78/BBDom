@@ -6,6 +6,7 @@ using log4net;
 using log4net.Config;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -50,53 +51,99 @@ namespace BBDom.Test.ConsoleApp.DotNetCore
             Task.Run(() =>
             {
                 var _run = true;
+                //var doAction = true;
+                //var address = "0/0/1";
+                //var state = true;
+
                 while (_run)
                 {
                     if (!_connected)
                     {
+                        InitGroups();
                         _connection.Connect();
                         Task.Run(() =>
                         {
                             Thread.Sleep(5000);
                         }).Wait();
 
-                        List<KnxGroupWithStateDto> groups = null;
-                        using (var ctx = new BBDomDbContext())
-                        {
-                            groups = ctx.KnxGroups
-                                //.Where(g => !g.State.HasValue)
-                                .Select(g => new KnxGroupWithStateDto
-                                {
-                                    Address = g.Address,
-                                    DPT = g.DPT,
-                                    Name = g.Name,
-                                    Direction = g.Direction,
-                                })
-                                .OrderBy(g => g.Address).ToList();
-                        }
-                        Groups = groups.ToDictionary(g => g.Address, g => g);
-
-                        _connection.Action("0/0/1", false);
-                        Task.Run(() =>
-                        {
-                            Thread.Sleep(2000);
-                        }).Wait();
-
-                        var readOnlyGroupAddresses = Groups.Values.Where(g => g.Direction == KnxGroupDirection.OUTPUT).Select(g => g.Address).ToList();
-                        foreach (var readOnlyGroupAddress in readOnlyGroupAddresses)
-                        {
-                            if (!_connected)
-                            {
-                                break;
-                            }
-                            _connection.RequestStatus(readOnlyGroupAddress);
-                            Task.Run(() =>
-                            {
-                                Thread.Sleep(1000);
-                            }).Wait();
-                        }
+                        //var readOnlyGroupAddresses = Groups.Values.Where(g => g.Direction == KnxGroupDirection.OUTPUT).Select(g => g.Address).ToList();
+                        //foreach (var readOnlyGroupAddress in readOnlyGroupAddresses)
+                        //{
+                        //    if (!_connected)
+                        //    {
+                        //        break;
+                        //    }
+                        //    _connection.RequestStatus(readOnlyGroupAddress);
+                        //    Task.Run(() =>
+                        //    {
+                        //        Thread.Sleep(1000);
+                        //    }).Wait();
+                        //}
                     }
-                    Thread.Sleep(100);
+
+                    //if (doAction)
+                    //{
+                    //    _connection.Action(address, state);
+                    //    Task.Run(() =>
+                    //    {
+                    //        Thread.Sleep(5000);
+                    //    }).Wait();
+
+                    //    state = !state;
+                    //}
+
+                    
+                    var cmd = PrintCommands();
+                    switch (cmd)
+                    {
+                        case "1":
+                            {
+                                var address = PrintRequestReadAddress();
+                                if (Groups.ContainsKey(address))
+                                {
+                                    var group = Groups[address];
+                                    if (!group.Read)
+                                    {
+                                        Console.Out.WriteLine("Indirizzo non valido");
+                                    }
+                                    else
+                                    {
+                                        _connection.RequestStatus(address);
+                                    }
+                                }
+                                else
+                                {
+                                    Console.Out.WriteLine("Indirizzo non valido");
+                                }
+                            }
+                            break;
+                        case "2":
+                            {
+                                var address = PrintRequestWriteAddress();
+                                if (Groups.ContainsKey(address))
+                                {
+                                    var group = Groups[address];
+                                    if (!group.Write)
+                                    {
+                                        Console.Out.WriteLine("Indirizzo non valido");
+                                    }
+                                    else
+                                    {
+                                        RequestStateChange(group);
+                                    }
+                                }
+                                else
+                                {
+                                    Console.Out.WriteLine("Indirizzo non valido");
+                                }
+                            }
+                            break;
+                        case "99":
+                            _run = false;
+                            break;
+                    }
+
+                    Thread.Sleep(3000);
                 }
             }).Wait();
             #endregion
@@ -110,7 +157,214 @@ namespace BBDom.Test.ConsoleApp.DotNetCore
             #endregion
 
         }
-        
+
+        private static void RequestStateChange(KnxGroupWithStateDto group)
+        {
+            switch (group.DPT.Value)
+            {
+                case KnxDPTEnum.BOOLEAN:
+                    {
+                        Console.Write("true/false: ");
+                        var boolString = Console.In.ReadLine();
+                        bool boolState;
+                        if (bool.TryParse(boolString, out boolState))
+                        {
+                            _connection.Action(group.Address, boolState);
+                        }
+                        else
+                        {
+                            Console.Out.WriteLine("Stato non valido");
+                        }
+                    }
+                    break;
+                case KnxDPTEnum.SWITCH:
+                    {
+                        Console.Write("on/off: ");
+                        var onOffString = Console.In.ReadLine();
+                        if (onOffString.ToLower() == "on".ToLower())
+                        {
+                            _connection.Action(group.Address, true);
+                        }
+                        else if (onOffString.ToLower() == "off".ToLower())
+                        {
+                            _connection.Action(group.Address, false);
+                        }
+                        else
+                        {
+                            Console.Out.WriteLine("Stato non valido");
+                        }
+                    }
+                    break;
+                case KnxDPTEnum.UP_DOWN:
+                    {
+                        Console.Write("up/down: ");
+                        var onOffString = Console.In.ReadLine();
+                        if (onOffString.ToLower() == "up".ToLower())
+                        {
+                            _connection.Action(group.Address, false);
+                        }
+                        else if (onOffString.ToLower() == "down".ToLower())
+                        {
+                            _connection.Action(group.Address, true);
+                        }
+                        else
+                        {
+                            Console.Out.WriteLine("Stato non valido");
+                        }
+                    }
+                    break;
+                case KnxDPTEnum.TEMPERATURE:
+                    {
+                        Console.Write("5..28: ");
+                        var tempString = Console.In.ReadLine();
+                        double tempState;
+                        if (double.TryParse(tempString, NumberStyles.Any, CultureInfo.InvariantCulture, out tempState) && (tempState >= 5 && tempState <= 28))
+                        {
+                            _connection.Action(group.Address, _connection.ToDataPoint(KnxDPT.KnxDPTs[KnxDPTEnum.TEMPERATURE], tempString));
+                        }
+                        else
+                        {
+                            Console.Out.WriteLine("Stato non valido");
+                        }
+                    }
+                    break;
+                case KnxDPTEnum.OPEN_CLOSE:
+                    {
+                        Console.Write("open/closed: ");
+                        var openClosedString = Console.In.ReadLine();
+                        if (openClosedString.ToLower() == "open".ToLower())
+                        {
+                            _connection.Action(group.Address, false);
+                        }
+                        else if (openClosedString.ToLower() == "closed".ToLower())
+                        {
+                            _connection.Action(group.Address, true);
+                        }
+                        else
+                        {
+                            Console.Out.WriteLine("Stato non valido");
+                        }
+                    }
+                    break;
+                case KnxDPTEnum.COUNTER_PULSES:
+                case KnxDPTEnum.DIMMING_CONTROL:
+                    Console.Out.WriteLine("DPT non gestito");
+                    break;
+                case KnxDPTEnum.PERCENTAGE:
+                    {
+                        Console.Write("0..100: ");
+                        var percString = Console.In.ReadLine();
+                        double percState;
+                        if (double.TryParse(percString, NumberStyles.Any, CultureInfo.InvariantCulture, out percState) &&
+                                percState >= 0 && percState <= 100)
+                        {
+                            _connection.Action(group.Address, _connection.ToDataPoint(KnxDPT.KnxDPTs[KnxDPTEnum.PERCENTAGE], percString));
+                        }
+                        else
+                        {
+                            Console.Out.WriteLine("Stato non valido");
+                        }
+                    }
+                    break;
+                case KnxDPTEnum.HVAC:
+                    {
+                        Console.Write("0..4: ");
+                        var intString = Console.In.ReadLine();
+                        int intHVAC;
+                        if (int.TryParse(intString, NumberStyles.Any, CultureInfo.InvariantCulture, out intHVAC) &&
+                                intHVAC >= 0 && intHVAC <= 4)
+                        {
+                            _connection.Action(group.Address, _connection.ToDataPoint(KnxDPT.KnxDPTs[KnxDPTEnum.HVAC], intString));
+                        }
+                        else
+                        {
+                            Console.Out.WriteLine("Stato non valido");
+                        }
+                    }
+                    break;
+                default:
+                    break;
+            }
+
+
+        }
+
+        private static string PrintCommands()
+        {
+            Console.WriteLine("1 - Request status");
+            Console.WriteLine("2 - Set state");
+            Console.WriteLine("99 - Quit");
+            Console.WriteLine("Comando: ");
+            return Console.In.ReadLine();
+        }
+
+        private static void InitGroups()
+        {
+            List<KnxGroupWithStateDto> groups = null;
+            using (var ctx = new BBDomDbContext())
+            {
+                groups = ctx.KnxGroups
+                            .Select(g => new KnxGroupWithStateDto
+                            {
+                                Address = g.Address,
+                                DPT = g.DPT,
+                                Name = g.Name,
+                                Read = g.Read,
+                                Write = g.Write,
+                            })
+                            .OrderBy(g => g.Address).ToList();
+            }
+            Groups = groups.ToDictionary(g => g.Address, g => g);
+        }
+        private static string PrintRequestReadAddress()
+        {
+            int lineSize = 4;
+            int index = 1;
+            Groups.ToList().Where(g => g.Value.Read).ToList().ForEach(g =>
+            {
+                if (index % lineSize != 0)
+                {
+                    Console.Out.Write(string.Format("{0}: {1}\t", g.Key, g.Value.Name));
+                }
+                else
+                {
+                    Console.Out.WriteLine(string.Format("{0}: {1}", g.Key, g.Value.Name));
+                }
+                index++;
+            });
+            if (index % lineSize != 1)
+            {
+                Console.Out.WriteLine();
+            }
+            Console.WriteLine("Indirizzo: ");
+            return Console.In.ReadLine();
+        }
+
+        private static string PrintRequestWriteAddress()
+        {
+            int lineSize = 4;
+            int index = 1;
+
+            Groups.ToList().Where(g => g.Value.Write).ToList().ForEach(g =>
+            {
+                if (index % lineSize != 0)
+                {
+                    Console.Out.Write(string.Format("{0}: {1}\t", g.Key, g.Value.Name));
+                }
+                else
+                {
+                    Console.Out.WriteLine(string.Format("{0}: {1}", g.Key, g.Value.Name));
+                }
+                index++;
+            });
+            if (index % lineSize != 1)
+            {
+                Console.Out.WriteLine();
+            }
+            Console.WriteLine("Indirizzo: ");
+            return Console.In.ReadLine();
+        }
+
         static void Log(string id, string message)
         {
             Logger.InfoFormat("{0}:{1}", id, message);
@@ -204,6 +458,23 @@ namespace BBDom.Test.ConsoleApp.DotNetCore
                 else
                 {
                     var knxGroup = Groups[address];
+                    switch (knxGroup.Address)
+                    {
+                        case "3/0/1":
+                            DoUscitaCasaNotte();
+                            break;
+                        case "3/0/2":
+                            DoUscitaCasaGiorno();
+                            break;
+                        case "3/0/3":
+                            DoIngressoCasaGiorno();
+                            break;
+                        case "3/0/5":
+                            DoSonno();
+                            break;
+                        default:
+                            break;
+                    }
                     LogValue(knxGroup, state, true);
                     using (var ctx = new BBDomDbContext())
                     {
@@ -225,6 +496,99 @@ namespace BBDom.Test.ConsoleApp.DotNetCore
                 Logger.ErrorFormat("Status, address {0}", address);
                 Logger.Error("Status", ex);
             }
+        }
+
+        private static void DoSonno()
+        {
+            _connection.Action("1/1/3", true);
+            Thread.Sleep(200);
+            _connection.Action("1/1/4", true);
+            Thread.Sleep(200);
+            _connection.Action("1/1/5", true);
+            Thread.Sleep(200);
+            _connection.Action("1/1/6", true);
+            Thread.Sleep(200);
+            _connection.Action("1/1/7", true);
+            Thread.Sleep(200);
+            _connection.Action("1/1/8", true);
+            Thread.Sleep(200);
+            _connection.Action("1/1/9", true);
+            Thread.Sleep(200);
+            _connection.Action("1/1/10", true);
+        }
+
+        private static void DoIngressoCasaGiorno()
+        {
+            //G1,G2,G3 = P1
+            _connection.Action("1/7/1", true);
+            Thread.Sleep(200);
+            _connection.Action("1/7/2", true);
+            Thread.Sleep(200);
+            _connection.Action("1/7/3", true);
+            Thread.Sleep(200);
+            _connection.Action("1/7/4", true);
+            Thread.Sleep(200);
+            _connection.Action("1/7/5", true);
+            Thread.Sleep(200);
+            _connection.Action("1/7/6", true);
+            Thread.Sleep(200);
+            _connection.Action("1/7/7", true);
+            Thread.Sleep(200);
+            _connection.Action("1/7/8", true);
+            Thread.Sleep(200);
+            _connection.Action("1/1/9", false);
+            Thread.Sleep(200);
+            _connection.Action("1/7/10", true);
+            Thread.Sleep(200);
+        }
+
+        private static void DoUscitaCasaGiorno()
+        {
+            //G1,G2,G3 = P0
+            _connection.Action("1/6/1", true);
+            Thread.Sleep(200);
+            _connection.Action("1/6/2", true);
+            Thread.Sleep(200);
+            _connection.Action("1/6/3", true);
+            Thread.Sleep(200);
+            _connection.Action("1/6/4", true);
+            Thread.Sleep(200);
+            _connection.Action("1/6/5", true);
+            Thread.Sleep(200);
+            _connection.Action("1/6/6", true);
+            Thread.Sleep(200);
+            _connection.Action("1/6/7", true);
+            Thread.Sleep(200);
+            _connection.Action("1/6/8", true);
+            Thread.Sleep(200);
+            _connection.Action("1/6/9", true);
+            Thread.Sleep(200);
+            _connection.Action("1/6/10", true);
+        }
+
+        private static void DoUscitaCasaNotte()
+        {
+            //G1,G3 = 0%, G2 = P0
+            _connection.Action("1/6/1", true);
+            Thread.Sleep(200);
+            _connection.Action("1/6/2", true);
+            Thread.Sleep(200);
+
+            _connection.Action("1/1/3", true);
+            Thread.Sleep(200);
+            _connection.Action("1/1/4", true);
+            Thread.Sleep(200);
+            _connection.Action("1/1/5", true);
+            Thread.Sleep(200);
+            _connection.Action("1/1/6", true);
+            Thread.Sleep(200);
+            _connection.Action("1/1/7", true);
+            Thread.Sleep(200);
+            _connection.Action("1/1/8", true);
+            Thread.Sleep(200);
+            _connection.Action("1/1/9", true);
+            Thread.Sleep(200);
+            _connection.Action("1/1/10", true);
         }
 
         private static void LogValue(KnxGroupWithStateDto knxGroup, string state, bool isEvent)
@@ -250,18 +614,23 @@ namespace BBDom.Test.ConsoleApp.DotNetCore
                         break;
                     case KnxDPTEnum.SWITCH:
                         bool switchVal = (bool)_connection.FromDataPoint(KnxDPT.KnxDPTs[KnxDPTEnum.SWITCH], state);
-                        knxGroup.State = switchVal ? 1: 0;
-                        stringFormat = string.Format("knxGroup {0}, switch: {1}", knxGroup.Name, switchVal);
+                        knxGroup.State = switchVal ? 1 : 0;
+                        stringFormat = string.Format("knxGroup {0}, switch: {1}", knxGroup.Name, switchVal ? "on" : "off");
+                        break;
+                    case KnxDPTEnum.BOOLEAN:
+                        bool booleanVal = (bool)_connection.FromDataPoint(KnxDPT.KnxDPTs[KnxDPTEnum.SWITCH], state);
+                        knxGroup.State = booleanVal ? 1 : 0;
+                        stringFormat = string.Format("knxGroup {0}, boolean: {1}", knxGroup.Name, booleanVal);
                         break;
                     case KnxDPTEnum.UP_DOWN:
                         bool upDownVal = (bool)_connection.FromDataPoint(KnxDPT.KnxDPTs[KnxDPTEnum.UP_DOWN], state);
                         knxGroup.State = upDownVal ? 1 : 0;
-                        stringFormat = string.Format("knxGroup {0}, upDown: {1}", knxGroup.Name, upDownVal);
+                        stringFormat = string.Format("knxGroup {0}, upDown: {1}", knxGroup.Name, upDownVal ? "down" : "up");
                         break;
                     case KnxDPTEnum.OPEN_CLOSE:
                         bool openCloseVal = (bool)_connection.FromDataPoint(KnxDPT.KnxDPTs[KnxDPTEnum.OPEN_CLOSE], state);
                         knxGroup.State = openCloseVal ? 1 : 0;
-                        stringFormat = string.Format("knxGroup {0}, openClose: {1}", knxGroup.Name, openCloseVal);
+                        stringFormat = string.Format("knxGroup {0}, openClose: {1}", knxGroup.Name, openCloseVal ? "opened" : "closed");
                         break;
                     case KnxDPTEnum.COUNTER_PULSES:
                         int counterPulsesVal = (int)_connection.FromDataPoint(KnxDPT.KnxDPTs[KnxDPTEnum.COUNTER_PULSES], state);
@@ -272,6 +641,31 @@ namespace BBDom.Test.ConsoleApp.DotNetCore
                         int step = (int)_connection.FromDataPoint(KnxDPT.KnxDPTs[KnxDPTEnum.DIMMING_CONTROL], state);
                         knxGroup.State = (double)step;
                         stringFormat = string.Format("knxGroup {0}, step: {1}", knxGroup.Name, step);
+                        break;
+                    case KnxDPTEnum.HVAC:
+                        int hvac = (int)_connection.FromDataPoint(KnxDPT.KnxDPTs[KnxDPTEnum.HVAC], state);
+                        knxGroup.State = hvac;
+                        switch (hvac)
+                        {
+                            case 0:
+                                stringFormat = string.Format("knxGroup {0}, hvac: Auto", knxGroup.Name);
+                                break;
+                            case 1:
+                                stringFormat = string.Format("knxGroup {0}, hvac: Comfort", knxGroup.Name);
+                                break;
+                            case 2:
+                                stringFormat = string.Format("knxGroup {0}, hvac: Standby", knxGroup.Name);
+                                break;
+                            case 3:
+                                stringFormat = string.Format("knxGroup {0}, hvac: Economy", knxGroup.Name);
+                                break;
+                            case 4:
+                                stringFormat = string.Format("knxGroup {0}, hvac: Building Protection", knxGroup.Name);
+                                break;
+                            default:
+                                stringFormat = string.Format("knxGroup {0}, hvac: {1}", knxGroup.Name, hvac);
+                                break;
+                        }
                         break;
                     default:
                         stringFormat = string.Format("New {0}: knxGroup {1} has state {2}", isEvent ? "Event" : "Status", knxGroup.Address, state);

@@ -77,9 +77,11 @@ namespace BBDom.Data.Migrations
 
                     b.Property<int?>("DPT");
 
-                    b.Property<int>("Direction");
-
                     b.Property<string>("Name");
+
+                    b.Property<bool>("Read");
+
+                    b.Property<bool>("Write");
 
                     b.HasKey("Address");
 

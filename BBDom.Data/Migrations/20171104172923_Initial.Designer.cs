@@ -12,8 +12,8 @@ using System;
 namespace BBDom.Data.Migrations
 {
     [DbContext(typeof(BBDomDbContext))]
-    [Migration("20170905115402_0.0.2")]
-    partial class _002
+    [Migration("20171104172923_Initial")]
+    partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -78,9 +78,11 @@ namespace BBDom.Data.Migrations
 
                     b.Property<int?>("DPT");
 
-                    b.Property<int>("Direction");
-
                     b.Property<string>("Name");
+
+                    b.Property<bool>("Read");
+
+                    b.Property<bool>("Write");
 
                     b.HasKey("Address");
 

@@ -8,7 +8,8 @@ namespace BBDom.Data.Dtos
         public string Address { get; set; }
         public string Name { get; set; }
         public KnxDPTEnum? DPT { get; set; }
-        public KnxGroupDirection Direction { get; set; }
+        public bool Read { get; set; }
+        public bool Write { get; set; }
         public double? State { get; set; }
     }
     
