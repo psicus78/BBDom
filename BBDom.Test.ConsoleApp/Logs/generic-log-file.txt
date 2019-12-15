@@ -1,0 +1,58 @@
+2017-12-13 23:26:36,535 INFO  BBDom.Test.ConsoleApp.Program - KNXLib.KnxConnectionTunneling:KNXLib connecting...
+2017-12-13 23:26:36,613 INFO  BBDom.Test.ConsoleApp.Program - Connected
+2017-12-13 23:26:41,650 INFO  BBDom.Test.ConsoleApp.Program - KNXLib.KnxConnection:Sending request status to 2/1/1.
+2017-12-13 23:26:41,666 INFO  BBDom.Test.ConsoleApp.Program - KNXLib.KnxConnection:Sent request status to 2/1/1.
+2017-12-13 23:26:41,791 INFO  BBDom.Test.ConsoleApp.Program - KNXLib.KnxReceiver:-----------------------------------------------------------------------------------------------------
+2017-12-13 23:26:41,806 INFO  BBDom.Test.ConsoleApp.Program - KNXLib.KnxReceiver:29-00-BC-F0-11-1E-11-01-03-00-40-07-AE
+2017-12-13 23:26:41,806 INFO  BBDom.Test.ConsoleApp.Program - KNXLib.KnxReceiver:Event Header Length: 6
+2017-12-13 23:26:41,806 INFO  BBDom.Test.ConsoleApp.Program - KNXLib.KnxReceiver:Event Protocol Version: 10
+2017-12-13 23:26:41,806 INFO  BBDom.Test.ConsoleApp.Program - KNXLib.KnxReceiver:Event Service Type: 0x0420
+2017-12-13 23:26:41,806 INFO  BBDom.Test.ConsoleApp.Program - KNXLib.KnxReceiver:Event Total Length: 23
+2017-12-13 23:26:41,806 INFO  BBDom.Test.ConsoleApp.Program - KNXLib.KnxReceiver:Event Message Code: 29
+2017-12-13 23:26:41,806 INFO  BBDom.Test.ConsoleApp.Program - KNXLib.KnxReceiver:Event Aditional Info Length: 0
+2017-12-13 23:26:41,806 INFO  BBDom.Test.ConsoleApp.Program - KNXLib.KnxReceiver:Event Control Field 1: 10111100
+2017-12-13 23:26:41,806 INFO  BBDom.Test.ConsoleApp.Program - KNXLib.KnxReceiver:Event Control Field 2: 11110000
+2017-12-13 23:26:41,806 INFO  BBDom.Test.ConsoleApp.Program - KNXLib.KnxReceiver:Event Source Address: 1.1.30
+2017-12-13 23:26:41,806 INFO  BBDom.Test.ConsoleApp.Program - KNXLib.KnxReceiver:Event Destination Address: 2/1/1
+2017-12-13 23:26:41,806 INFO  BBDom.Test.ConsoleApp.Program - KNXLib.KnxReceiver:Event Data Length: 3
+2017-12-13 23:26:41,806 INFO  BBDom.Test.ConsoleApp.Program - KNXLib.KnxReceiver:Event APDU: 0x004007AE
+2017-12-13 23:26:41,806 INFO  BBDom.Test.ConsoleApp.Program - KNXLib.KnxReceiver:Event Data: 0x07AE
+2017-12-13 23:26:41,806 INFO  BBDom.Test.ConsoleApp.Program - KNXLib.KnxReceiver:-----------------------------------------------------------------------------------------------------
+2017-12-13 23:26:42,072 INFO  BBDom.Test.ConsoleApp.Program - New temp: device 2/1/1 has state ®, temp: 19.66
+2017-12-13 23:26:42,072 INFO  BBDom.Test.ConsoleApp.Program - KNXLib.KnxConnection:Device 2/1/1 has status ®
+2017-12-13 23:26:42,671 INFO  BBDom.Test.ConsoleApp.Program - KNXLib.KnxConnection:Sending request status to 2/1/2.
+2017-12-13 23:26:42,671 INFO  BBDom.Test.ConsoleApp.Program - KNXLib.KnxConnection:Sent request status to 2/1/2.
+2017-12-13 23:26:42,671 INFO  BBDom.Test.ConsoleApp.Program - KNXLib.KnxReceiver:-----------------------------------------------------------------------------------------------------
+2017-12-13 23:26:42,671 INFO  BBDom.Test.ConsoleApp.Program - KNXLib.KnxReceiver:2E-00-BC-F0-FF-F1-11-02-01-00-00
+2017-12-13 23:26:42,671 INFO  BBDom.Test.ConsoleApp.Program - KNXLib.KnxReceiver:Event Header Length: 6
+2017-12-13 23:26:42,671 INFO  BBDom.Test.ConsoleApp.Program - KNXLib.KnxReceiver:Event Protocol Version: 10
+2017-12-13 23:26:42,671 INFO  BBDom.Test.ConsoleApp.Program - KNXLib.KnxReceiver:Event Service Type: 0x0420
+2017-12-13 23:26:42,671 INFO  BBDom.Test.ConsoleApp.Program - KNXLib.KnxReceiver:Event Total Length: 21
+2017-12-13 23:26:42,671 INFO  BBDom.Test.ConsoleApp.Program - KNXLib.KnxReceiver:Event Message Code: 2e
+2017-12-13 23:26:42,671 INFO  BBDom.Test.ConsoleApp.Program - KNXLib.KnxReceiver:Event Aditional Info Length: 0
+2017-12-13 23:26:42,671 INFO  BBDom.Test.ConsoleApp.Program - KNXLib.KnxReceiver:Event Control Field 1: 10111100
+2017-12-13 23:26:42,671 INFO  BBDom.Test.ConsoleApp.Program - KNXLib.KnxReceiver:Event Control Field 2: 11110000
+2017-12-13 23:26:42,671 INFO  BBDom.Test.ConsoleApp.Program - KNXLib.KnxReceiver:Event Source Address: 15.15.241
+2017-12-13 23:26:42,671 INFO  BBDom.Test.ConsoleApp.Program - KNXLib.KnxReceiver:Event Destination Address: 2/1/2
+2017-12-13 23:26:42,671 INFO  BBDom.Test.ConsoleApp.Program - KNXLib.KnxReceiver:Event Data Length: 1
+2017-12-13 23:26:42,671 INFO  BBDom.Test.ConsoleApp.Program - KNXLib.KnxReceiver:Event APDU: 0x0000
+2017-12-13 23:26:42,671 INFO  BBDom.Test.ConsoleApp.Program - KNXLib.KnxReceiver:Event Data: 0x00
+2017-12-13 23:26:42,671 INFO  BBDom.Test.ConsoleApp.Program - KNXLib.KnxReceiver:-----------------------------------------------------------------------------------------------------
+2017-12-13 23:26:42,796 INFO  BBDom.Test.ConsoleApp.Program - KNXLib.KnxReceiver:-----------------------------------------------------------------------------------------------------
+2017-12-13 23:26:42,796 INFO  BBDom.Test.ConsoleApp.Program - KNXLib.KnxReceiver:29-00-BC-F0-11-1E-11-02-03-00-40-07-8A
+2017-12-13 23:26:42,796 INFO  BBDom.Test.ConsoleApp.Program - KNXLib.KnxReceiver:Event Header Length: 6
+2017-12-13 23:26:42,796 INFO  BBDom.Test.ConsoleApp.Program - KNXLib.KnxReceiver:Event Protocol Version: 10
+2017-12-13 23:26:42,796 INFO  BBDom.Test.ConsoleApp.Program - KNXLib.KnxReceiver:Event Service Type: 0x0420
+2017-12-13 23:26:42,796 INFO  BBDom.Test.ConsoleApp.Program - KNXLib.KnxReceiver:Event Total Length: 23
+2017-12-13 23:26:42,796 INFO  BBDom.Test.ConsoleApp.Program - KNXLib.KnxReceiver:Event Message Code: 29
+2017-12-13 23:26:42,796 INFO  BBDom.Test.ConsoleApp.Program - KNXLib.KnxReceiver:Event Aditional Info Length: 0
+2017-12-13 23:26:42,796 INFO  BBDom.Test.ConsoleApp.Program - KNXLib.KnxReceiver:Event Control Field 1: 10111100
+2017-12-13 23:26:42,796 INFO  BBDom.Test.ConsoleApp.Program - KNXLib.KnxReceiver:Event Control Field 2: 11110000
+2017-12-13 23:26:42,796 INFO  BBDom.Test.ConsoleApp.Program - KNXLib.KnxReceiver:Event Source Address: 1.1.30
+2017-12-13 23:26:42,796 INFO  BBDom.Test.ConsoleApp.Program - KNXLib.KnxReceiver:Event Destination Address: 2/1/2
+2017-12-13 23:26:42,796 INFO  BBDom.Test.ConsoleApp.Program - KNXLib.KnxReceiver:Event Data Length: 3
+2017-12-13 23:26:42,796 INFO  BBDom.Test.ConsoleApp.Program - KNXLib.KnxReceiver:Event APDU: 0x0040078A
+2017-12-13 23:26:42,796 INFO  BBDom.Test.ConsoleApp.Program - KNXLib.KnxReceiver:Event Data: 0x078A
+2017-12-13 23:26:42,796 INFO  BBDom.Test.ConsoleApp.Program - KNXLib.KnxReceiver:-----------------------------------------------------------------------------------------------------
+2017-12-13 23:26:42,796 INFO  BBDom.Test.ConsoleApp.Program - New temp: device 2/1/2 has state ?, temp: 19.3
+2017-12-13 23:26:42,796 INFO  BBDom.Test.ConsoleApp.Program - KNXLib.KnxConnection:Device 2/1/2 has status ?

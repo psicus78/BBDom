@@ -8,8 +8,6 @@ namespace BBDom.Test.DotNetCore
         [TestMethod]
         public void KnxTestTestMethod1()
         {
-            var knx = new Biz.DotNetStandard.Knx();
-            knx.Connect();
         }
     }
 }
