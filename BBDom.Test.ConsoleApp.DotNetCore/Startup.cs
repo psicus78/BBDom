@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using System;
 
 namespace BBDom.Test.ConsoleApp.DotNetCore
 {
@@ -21,20 +22,21 @@ namespace BBDom.Test.ConsoleApp.DotNetCore
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<BBDomDbContext>(options =>
-                options.UseSqlite(Configuration.GetConnectionString("BBDomConnection")));
+            services.AddDbContext<BBDomDbContext>(options => options.UseSqlite(Configuration.GetConnectionString("BBDomConnection")));
             services.AddDatabaseDeveloperPageExceptionFilter();
 
-            services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
-                .AddEntityFrameworkStores<BBDomDbContext>();
+            services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<BBDomDbContext>();
             services.AddControllersWithViews();
 
             services.AddSingleton<KnxConnectionManager>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, KnxConnectionManager knxConnectionManager, IHostApplicationLifetime appLifetime)
         {
+            appLifetime.ApplicationStarted.Register(OnStarted, knxConnectionManager);
+            appLifetime.ApplicationStopping.Register(OnStopping, knxConnectionManager);
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -61,6 +63,20 @@ namespace BBDom.Test.ConsoleApp.DotNetCore
                     pattern: "{controller=Home}/{action=Index}/{id?}");
                 endpoints.MapRazorPages();
             });
+
         }
+
+        private void OnStarted(object state)
+        {
+            var knxConnectionManager = (KnxConnectionManager)state;
+            knxConnectionManager.Init();
+        }
+
+        private void OnStopping(object state)
+        {
+            var knxConnectionManager = (KnxConnectionManager)state;
+            knxConnectionManager.Shutdown();
+        }
+
     }
 }

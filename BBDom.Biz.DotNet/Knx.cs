@@ -7,15 +7,15 @@ namespace BBDom.Biz.DotNet
 {
     public class Knx
     {
-        private static ILog Logger = LogManager.GetLogger(typeof(Knx));
+        private static ILog _logger = LogManager.GetLogger(typeof(Knx));
 
         static KnxConnection _connection { get; set; }
         public void Test()
         {
-            KNXLib.Log.Logger.DebugEventEndpoint += Log;
-            KNXLib.Log.Logger.InfoEventEndpoint += Log;
-            KNXLib.Log.Logger.WarnEventEndpoint += Log;
-            KNXLib.Log.Logger.ErrorEventEndpoint += Log;
+            KNXLib.Log._logger.DebugEventEndpoint += Log;
+            KNXLib.Log._logger.InfoEventEndpoint += Log;
+            KNXLib.Log._logger.WarnEventEndpoint += Log;
+            KNXLib.Log._logger.ErrorEventEndpoint += Log;
             //var connection = new KnxConnectionRouting("192.128.1.100");
             _connection = new KnxConnectionTunneling("192.128.1.100", 3671, "192.128.1.1", 3671);
             _connection.Debug = true;
@@ -103,38 +103,38 @@ namespace BBDom.Biz.DotNet
 
         void Log(string id, string message)
         {
-            Logger.InfoFormat("{0}:{1}", id, message);
+            _logger.InfoFormat("{0}:{1}", id, message);
         }
 
         void Connected()
         {
-            Logger.Info("Connected");
+            _logger.Info("Connected");
         }
         void Disconnected()
         {
-            Logger.Info("Disconnected");
+            _logger.Info("Disconnected");
         }
 
         void Status(string address, string state)
         {
-            Logger.InfoFormat("New Event: device {0} has state {1}", address, state);
+            _logger.InfoFormat("New Event: device {0} has state {1}", address, state);
             if (address == "1/1/50")
             {
                 decimal temp = (decimal)_connection.FromDataPoint("9.001", state);
-                Logger.InfoFormat("New Event: device " + address + " has status " + temp);
+                _logger.InfoFormat("New Event: device " + address + " has status " + temp);
                 return;
             }
             if (address == "1/1/17")
             {
                 int perc = (int)_connection.FromDataPoint("5.001", state);
-                Logger.InfoFormat("New Event: device " + address + " has status " + perc);
+                _logger.InfoFormat("New Event: device " + address + " has status " + perc);
                 return;
             }
         }
         
         void Event(string address, string state)
         {
-            Logger.InfoFormat("New Event: device {0} has status {1}", address, state);
+            _logger.InfoFormat("New Event: device {0} has status {1}", address, state);
         }
 
     }

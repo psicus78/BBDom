@@ -2,14 +2,12 @@
 using BBDom.Data.Dtos;
 using BBDom.Data.Models;
 using KNXLib;
-using log4net;
-using log4net.Config;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Threading.Tasks;
 
 namespace BBDom.Test.ConsoleApp.DotNetCore
@@ -17,41 +15,40 @@ namespace BBDom.Test.ConsoleApp.DotNetCore
     public class KnxConnectionManager
     {
 
-        private static ILog Logger = LogManager.GetLogger(typeof(KnxConnectionManager));
+        private readonly ILogger<KnxConnectionManager> _logger;
+        private readonly IServiceProvider _serviceProvider;
+        private KnxConnection _connection;
+        private bool _connected = false;
+        private bool _run = false;
+        private object _runLock = new Boolean();
 
-        static KnxConnection _connection { get; set; }
-        static bool _connected = false;
+        Dictionary<string, KnxGroupWithStateDto> Groups = new Dictionary<string, KnxGroupWithStateDto>();
 
-        static Dictionary<string, KnxGroupWithStateDto> Groups = new Dictionary<string, KnxGroupWithStateDto>();
+        public KnxConnectionManager(ILogger<KnxConnectionManager> logger, IServiceProvider serviceProvider)
+        {
+            _logger = logger;
+            _serviceProvider = serviceProvider;
+
+            KNXLib.Log._logger.DebugEventEndpoint += Log;
+            KNXLib.Log._logger.InfoEventEndpoint += Log;
+            KNXLib.Log._logger.WarnEventEndpoint += Log;
+            KNXLib.Log._logger.ErrorEventEndpoint += Log;
+
+        }
 
         public void Init()
         {
-
-            //try
-            //{
-            //    log4net.Config.XmlConfigurator.Configure();
-            //}
-            //catch (Exception) { }
-
-            //var knx = new BBDom.Biz.DotNet.Knx();
-
-            //knx.Test();
-
-            try
+            lock (_runLock)
             {
-                var logRepository = LogManager.GetRepository(Assembly.GetEntryAssembly());
-                XmlConfigurator.ConfigureAndWatch(logRepository, new FileInfo("log4net.config"));
+                if (_run)
+                {
+                    return;
+                }
+
+                _run = true;
             }
-            catch (Exception) { }
-
-            //KNXLib.Log.Logger.DebugEventEndpoint += Log;
-            //KNXLib.Log.Logger.InfoEventEndpoint += Log;
-            KNXLib.Log.Logger.WarnEventEndpoint += Log;
-            KNXLib.Log.Logger.ErrorEventEndpoint += Log;
-
             _connection = new KnxConnectionTunneling("192.168.1.100", 3671, "192.168.1.101", 3671);
-            //_connection.Debug = true;
-
+            _connection.Debug = true;
             _connection.KnxDisconnectedDelegate += Disconnected;
             _connection.KnxConnectedDelegate += Connected;
             _connection.KnxStatusDelegate += Status;
@@ -60,7 +57,6 @@ namespace BBDom.Test.ConsoleApp.DotNetCore
             #region Never ending loop
             Task.Run(() =>
             {
-                var _run = true;
                 //var doAction = true;
                 //var address = "0/0/1";
                 //var state = true;
@@ -71,7 +67,7 @@ namespace BBDom.Test.ConsoleApp.DotNetCore
                     {
                         InitGroups();
 
-                        Console.Out.WriteLine("Connecting");
+                        _logger.LogInformation("Connecting");
                         _connection.Connect();
                         Task.Delay(5000).GetAwaiter().GetResult();
 
@@ -92,70 +88,85 @@ namespace BBDom.Test.ConsoleApp.DotNetCore
                         //}
                     }
 
-                    var cmd = PrintCommands();
-                    switch (cmd)
-                    {
-                        case "1":
-                            {
-                                var address = PrintRequestReadAddress();
-                                if (Groups.ContainsKey(address))
-                                {
-                                    var group = Groups[address];
-                                    if (!group.Read)
-                                    {
-                                        Console.Out.WriteLine("Indirizzo non valido");
-                                    }
-                                    else
-                                    {
-                                        _connection.RequestStatus(address);
-                                    }
-                                }
-                                else
-                                {
-                                    Console.Out.WriteLine("Indirizzo non valido");
-                                }
-                            }
-                            break;
-                        case "2":
-                            {
-                                var address = PrintRequestWriteAddress();
-                                if (Groups.ContainsKey(address))
-                                {
-                                    var group = Groups[address];
-                                    if (!group.Write)
-                                    {
-                                        Console.Out.WriteLine("Indirizzo non valido");
-                                    }
-                                    else
-                                    {
-                                        RequestStateChange(group);
-                                    }
-                                }
-                                else
-                                {
-                                    Console.Out.WriteLine("Indirizzo non valido");
-                                }
-                            }
-                            break;
-                        case "99":
-                            _run = false;
-                            break;
-                    }
+                    //var cmd = PrintCommands();
+                    //switch (cmd)
+                    //{
+                    //    case "1":
+                    //        {
+                    //            var address = PrintRequestReadAddress();
+                    //            if (Groups.ContainsKey(address))
+                    //            {
+                    //                var group = Groups[address];
+                    //                if (!group.Read)
+                    //                {
+                    //                    Console.Out.WriteLine("Indirizzo non valido");
+                    //                }
+                    //                else
+                    //                {
+                    //                    _connection.RequestStatus(address);
+                    //                }
+                    //            }
+                    //            else
+                    //            {
+                    //                Console.Out.WriteLine("Indirizzo non valido");
+                    //            }
+                    //        }
+                    //        break;
+                    //    case "2":
+                    //        {
+                    //            var address = PrintRequestWriteAddress();
+                    //            if (Groups.ContainsKey(address))
+                    //            {
+                    //                var group = Groups[address];
+                    //                if (!group.Write)
+                    //                {
+                    //                    Console.Out.WriteLine("Indirizzo non valido");
+                    //                }
+                    //                else
+                    //                {
+                    //                    RequestStateChange(group);
+                    //                }
+                    //            }
+                    //            else
+                    //            {
+                    //                Console.Out.WriteLine("Indirizzo non valido");
+                    //            }
+                    //        }
+                    //        break;
+                    //    case "99":
+                    //        _run = false;
+                    //        break;
+                    //}
 
-                    Task.Delay(3000).GetAwaiter().GetResult();
+                    Task.Delay(100).GetAwaiter().GetResult();
                 }
+
             }).Wait();
             #endregion
 
-            #region Disconnessione
-            _connection.Disconnect();
-
-            Task.Delay(10000).GetAwaiter().GetResult();
-            #endregion
 
         }
 
-        private static void RequestStateChange(KnxGroupWithStateDto group)
+        public void Shutdown()
+        {
+            lock (_runLock)
+            {
+                if (!_run)
+                {
+                    return;
+                }
+                _run = false;
+            }
+            _connection.Disconnect();
+            Task.Delay(10000).GetAwaiter().GetResult();
+            _connection.KnxDisconnectedDelegate -= Disconnected;
+            _connection.KnxConnectedDelegate -= Connected;
+            _connection.KnxStatusDelegate -= Status;
+            _connection.KnxEventDelegate -= Event;
+            _connection = null;
+        }
+
+        private void RequestStateChange(KnxGroupWithStateDto group)
         {
             switch (group.DPT.Value)
             {
@@ -286,7 +297,7 @@ namespace BBDom.Test.ConsoleApp.DotNetCore
 
         }
 
-        private static string PrintCommands()
+        private string PrintCommands()
         {
             Console.WriteLine("1 - Request status");
             Console.WriteLine("2 - Set state");
@@ -295,11 +306,12 @@ namespace BBDom.Test.ConsoleApp.DotNetCore
             return Console.In.ReadLine();
         }
 
-        private static void InitGroups()
+        private void InitGroups()
         {
             List<KnxGroupWithStateDto> groups = null;
-            using (var ctx = new BBDomDbContext())
+            using (var scope = _serviceProvider.CreateScope())
             {
+                var ctx = scope.ServiceProvider.GetService<BBDomDbContext>();
                 groups = ctx.KnxGroups
                             .Select(g => new KnxGroupWithStateDto
                             {
@@ -313,7 +325,7 @@ namespace BBDom.Test.ConsoleApp.DotNetCore
             }
             Groups = groups.ToDictionary(g => g.Address, g => g);
         }
-        private static string PrintRequestReadAddress()
+        private string PrintRequestReadAddress()
         {
             int lineSize = 4;
             int index = 1;
@@ -337,7 +349,7 @@ namespace BBDom.Test.ConsoleApp.DotNetCore
             return Console.In.ReadLine();
         }
 
-        private static string PrintRequestWriteAddress()
+        private string PrintRequestWriteAddress()
         {
             int lineSize = 4;
             int index = 1;
@@ -362,23 +374,23 @@ namespace BBDom.Test.ConsoleApp.DotNetCore
             return Console.In.ReadLine();
         }
 
-        static void Log(string id, string message)
+        void Log(string id, string message)
         {
-            Logger.InfoFormat("{0}:{1}", id, message);
+            _logger.LogInformation("{0}:{1}", id, message);
         }
 
-        static void Connected()
+        void Connected()
         {
-            Console.Out.WriteLine("Connected");
+            _logger.LogInformation("Connected");
             _connected = true;
         }
-        static void Disconnected()
+        void Disconnected()
         {
-            Console.Out.WriteLine("Disconnected");
+            _logger.LogInformation("Disconnected");
             _connected = false;
         }
 
-        static void Status(string address, string state)
+        void Status(string address, string state)
         {
             try
             {
@@ -390,8 +402,9 @@ namespace BBDom.Test.ConsoleApp.DotNetCore
                         Name = address,
                     };
                     LogValue(knxGroup, state, false);
-                    using (var ctx = new BBDomDbContext())
+                    using (var scope = _serviceProvider.CreateScope())
                     {
+                        var ctx = scope.ServiceProvider.GetService<BBDomDbContext>();
                         ctx.KnxGroups.Add(new KnxGroup
                         {
                             Address = address,
@@ -400,15 +413,16 @@ namespace BBDom.Test.ConsoleApp.DotNetCore
                         ctx.SaveChanges();
                     }
                     Groups[address] = knxGroup;
-                    Logger.InfoFormat("New Status: device {0} has state {1}", address, state);
+                    _logger.LogInformation("New Status: device {0} has state {1}", address, state);
                 }
                 else
                 {
                     var knxGroup = Groups[address];
                     LogValue(knxGroup, state, false);
-                    using (var ctx = new BBDomDbContext())
+                    using (var scope = _serviceProvider.CreateScope())
                     {
                         var utcNow = DateTime.UtcNow;
+                        var ctx = scope.ServiceProvider.GetService<BBDomDbContext>();
                         ctx.KnxStates.Add(new KnxState
                         {
                             Address = knxGroup.Address,
@@ -423,12 +437,12 @@ namespace BBDom.Test.ConsoleApp.DotNetCore
             }
             catch (Exception ex)
             {
-                Logger.ErrorFormat("Status, address {0}", address);
-                Logger.Error("Status", ex);
+                _logger.LogError("Status, address {0}", address);
+                _logger.LogError("Status, exception: {0}", string.Format("{0}{1}{2}", ex.Message, System.Environment.NewLine, ex.StackTrace));
             }
         }
 
-        static void Event(string address, string state)
+        void Event(string address, string state)
         {
             try
             {
@@ -440,8 +454,10 @@ namespace BBDom.Test.ConsoleApp.DotNetCore
                         Name = address,
                     };
                     LogValue(knxGroup, state, true);
-                    using (var ctx = new BBDomDbContext())
+                    using (var scope = _serviceProvider.CreateScope())
                     {
+                        var utcNow = DateTime.UtcNow;
+                        var ctx = scope.ServiceProvider.GetService<BBDomDbContext>();
                         ctx.KnxGroups.Add(new KnxGroup
                         {
                             Address = address,
@@ -450,7 +466,7 @@ namespace BBDom.Test.ConsoleApp.DotNetCore
                         ctx.SaveChanges();
                     }
                     Groups[address] = knxGroup;
-                    Logger.InfoFormat("New Event: device {0} has state {1}", address, state);
+                    _logger.LogInformation("New Event: device {0} has state {1}", address, state);
                 }
                 else
                 {
@@ -473,9 +489,10 @@ namespace BBDom.Test.ConsoleApp.DotNetCore
                             break;
                     }
                     LogValue(knxGroup, state, true);
-                    using (var ctx = new BBDomDbContext())
+                    using (var scope = _serviceProvider.CreateScope())
                     {
                         var utcNow = DateTime.UtcNow;
+                        var ctx = scope.ServiceProvider.GetService<BBDomDbContext>();
                         ctx.KnxStates.Add(new KnxState
                         {
                             Address = knxGroup.Address,
@@ -490,12 +507,12 @@ namespace BBDom.Test.ConsoleApp.DotNetCore
             }
             catch (Exception ex)
             {
-                Logger.ErrorFormat("Status, address {0}", address);
-                Logger.Error("Status", ex);
+                _logger.LogError("Event, address {0}", address);
+                _logger.LogError("Event, exception: {0}", string.Format("{0}{1}{2}", ex.Message, System.Environment.NewLine, ex.StackTrace));
             }
         }
 
-        private static void DoSonno()
+        private void DoSonno()
         {
             _connection.Action("1/1/1", true);
             Task.Delay(200).GetAwaiter().GetResult();
@@ -518,80 +535,80 @@ namespace BBDom.Test.ConsoleApp.DotNetCore
             _connection.Action("1/1/10", true);
         }
 
-        private static void DoIngressoCasaGiorno()
+        private void DoIngressoCasaGiorno()
         {
             //G1,G2,G3 = P1
             _connection.Action("1/7/1", true);
-             Task.Delay(200).GetAwaiter().GetResult();
+            Task.Delay(200).GetAwaiter().GetResult();
             _connection.Action("1/7/2", true);
-             Task.Delay(200).GetAwaiter().GetResult();
+            Task.Delay(200).GetAwaiter().GetResult();
             _connection.Action("1/7/3", true);
-             Task.Delay(200).GetAwaiter().GetResult();
+            Task.Delay(200).GetAwaiter().GetResult();
             _connection.Action("1/7/4", true);
-             Task.Delay(200).GetAwaiter().GetResult();
+            Task.Delay(200).GetAwaiter().GetResult();
             _connection.Action("1/7/5", true);
-             Task.Delay(200).GetAwaiter().GetResult();
+            Task.Delay(200).GetAwaiter().GetResult();
             _connection.Action("1/7/6", true);
-             Task.Delay(200).GetAwaiter().GetResult();
+            Task.Delay(200).GetAwaiter().GetResult();
             _connection.Action("1/7/7", true);
-             Task.Delay(200).GetAwaiter().GetResult();
+            Task.Delay(200).GetAwaiter().GetResult();
             _connection.Action("1/7/8", true);
-             Task.Delay(200).GetAwaiter().GetResult();
+            Task.Delay(200).GetAwaiter().GetResult();
             _connection.Action("1/1/9", false);
-             Task.Delay(200).GetAwaiter().GetResult();
+            Task.Delay(200).GetAwaiter().GetResult();
             _connection.Action("1/7/10", true);
-             Task.Delay(200).GetAwaiter().GetResult();
+            Task.Delay(200).GetAwaiter().GetResult();
         }
 
-        private static void DoUscitaCasaGiorno()
+        private void DoUscitaCasaGiorno()
         {
             //G1,G2,G3 = P0
             _connection.Action("1/6/1", true);
-             Task.Delay(200).GetAwaiter().GetResult();
+            Task.Delay(200).GetAwaiter().GetResult();
             _connection.Action("1/6/2", true);
-             Task.Delay(200).GetAwaiter().GetResult();
+            Task.Delay(200).GetAwaiter().GetResult();
             _connection.Action("1/6/3", true);
-             Task.Delay(200).GetAwaiter().GetResult();
+            Task.Delay(200).GetAwaiter().GetResult();
             _connection.Action("1/6/4", true);
-             Task.Delay(200).GetAwaiter().GetResult();
+            Task.Delay(200).GetAwaiter().GetResult();
             _connection.Action("1/6/5", true);
-             Task.Delay(200).GetAwaiter().GetResult();
+            Task.Delay(200).GetAwaiter().GetResult();
             _connection.Action("1/6/6", true);
-             Task.Delay(200).GetAwaiter().GetResult();
+            Task.Delay(200).GetAwaiter().GetResult();
             _connection.Action("1/6/7", true);
-             Task.Delay(200).GetAwaiter().GetResult();
+            Task.Delay(200).GetAwaiter().GetResult();
             _connection.Action("1/6/8", true);
-             Task.Delay(200).GetAwaiter().GetResult();
+            Task.Delay(200).GetAwaiter().GetResult();
             _connection.Action("1/6/9", true);
-             Task.Delay(200).GetAwaiter().GetResult();
+            Task.Delay(200).GetAwaiter().GetResult();
             _connection.Action("1/6/10", true);
         }
 
-        private static void DoUscitaCasaNotte()
+        private void DoUscitaCasaNotte()
         {
             //G1,G3 = 0%, G2 = P0
             _connection.Action("1/1/1", true);
-             Task.Delay(200).GetAwaiter().GetResult();
+            Task.Delay(200).GetAwaiter().GetResult();
             _connection.Action("1/1/2", true);
-             Task.Delay(200).GetAwaiter().GetResult();
+            Task.Delay(200).GetAwaiter().GetResult();
             _connection.Action("1/1/3", true);
-             Task.Delay(200).GetAwaiter().GetResult();
+            Task.Delay(200).GetAwaiter().GetResult();
             _connection.Action("1/1/4", true);
-             Task.Delay(200).GetAwaiter().GetResult();
+            Task.Delay(200).GetAwaiter().GetResult();
             _connection.Action("1/1/5", true);
-             Task.Delay(200).GetAwaiter().GetResult();
+            Task.Delay(200).GetAwaiter().GetResult();
             _connection.Action("1/1/6", true);
-             Task.Delay(200).GetAwaiter().GetResult();
+            Task.Delay(200).GetAwaiter().GetResult();
             _connection.Action("1/1/7", true);
-             Task.Delay(200).GetAwaiter().GetResult();
+            Task.Delay(200).GetAwaiter().GetResult();
             _connection.Action("1/1/8", true);
-             Task.Delay(200).GetAwaiter().GetResult();
+            Task.Delay(200).GetAwaiter().GetResult();
             _connection.Action("1/1/9", true);
-             Task.Delay(200).GetAwaiter().GetResult();
+            Task.Delay(200).GetAwaiter().GetResult();
             _connection.Action("1/1/10", true);
         }
 
-        private static void StartupCaldaia()
+        private void StartupCaldaia()
         {
             //set stato caldaia a on e poi off, perché quando si riavvia l'impianto elettrico lo switch non funziona,
             //inoltre, se dovesse capitare un black-out elettrico con la caldaia a on al ritorno della corrente quest'ultima resterebbe accesa
@@ -600,10 +617,10 @@ namespace BBDom.Test.ConsoleApp.DotNetCore
             Task.Delay(30000).GetAwaiter().GetResult();
             Console.Out.WriteLine("StartupCaldaia, off");
             _connection.Action("2/0/1", false);
-             Task.Delay(200).GetAwaiter().GetResult();
+            Task.Delay(200).GetAwaiter().GetResult();
         }
 
-        private static void LogValue(KnxGroupWithStateDto knxGroup, string state, bool isEvent)
+        private void LogValue(KnxGroupWithStateDto knxGroup, string state, bool isEvent)
         {
             string stringFormat = string.Empty;
             if (!knxGroup.DPT.HasValue)
@@ -684,9 +701,9 @@ namespace BBDom.Test.ConsoleApp.DotNetCore
                         break;
                 }
             }
-            Logger.InfoFormat(stringFormat);
+            _logger.LogInformation(stringFormat);
             Console.Out.WriteLine(stringFormat);
         }
-        
+
     }
 }
