@@ -2,10 +2,12 @@
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
+    <UserSecretsId>9b34048a-12d3-44e2-8a8f-bbce18be8385</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="NLog.Web.AspNetCore" Version="4.9.0" />
+    <PackageReference Include="NLog.Web.AspNetCore" Version="4.9.3" />
+    <PackageReference Include="Topshelf" Version="4.2.1" />
   </ItemGroup>
 
   <ItemGroup>

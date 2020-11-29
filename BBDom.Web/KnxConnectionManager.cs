@@ -55,7 +55,7 @@ namespace BBDom.Web
             _connection.KnxEventDelegate += Event;
 
             #region Never ending loop
-            Task.Run(() =>
+            Task.Factory.StartNew(() =>
             {
                 //var doAction = true;
                 //var address = "0/0/1";
@@ -141,9 +141,8 @@ namespace BBDom.Web
                     Task.Delay(100).GetAwaiter().GetResult();
                 }
 
-            }).Wait();
+            });
             #endregion
-
 
         }
 
