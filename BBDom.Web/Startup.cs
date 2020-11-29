@@ -8,7 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
 
-namespace BBDom.Test.ConsoleApp.DotNetCore
+namespace BBDom.Web
 {
     public class Startup
     {

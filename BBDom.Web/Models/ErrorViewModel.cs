@@ -1,6 +1,6 @@
 using System;
 
-namespace WebApplication3.Models
+namespace BBDom.Web.Models
 {
     public class ErrorViewModel
     {

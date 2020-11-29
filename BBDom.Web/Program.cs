@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 using NLog.Web;
 
-namespace BBDom.Test.ConsoleApp.DotNetCore
+namespace BBDom.Web
 {
     public class Program
     {

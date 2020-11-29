@@ -1,6 +1,6 @@
 {
   "profiles": {
-    "BBDom.Test.ConsoleApp.DotNetCore": {
+    "BBDom.Web": {
       "commandName": "Project",
       "launchBrowser": true,
       "environmentVariables": {

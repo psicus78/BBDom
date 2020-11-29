@@ -10,7 +10,7 @@ using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace BBDom.Test.ConsoleApp.DotNetCore
+namespace BBDom.Web
 {
     public class KnxConnectionManager
     {

@@ -11,7 +11,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KNXLib", "..\knx.net\src\KN
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BBDom.Data", "BBDom.Data\BBDom.Data.csproj", "{1F321AF5-831D-4CCE-8897-C6AFECE9223E}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BBDom.Test.ConsoleApp.DotNetCore", "BBDom.Test.ConsoleApp.DotNetCore\BBDom.Test.ConsoleApp.DotNetCore.csproj", "{9746696C-356F-4F1D-BAC6-11785F5AEF14}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BBDom.Web", "BBDom.Web\BBDom.Web.csproj", "{9746696C-356F-4F1D-BAC6-11785F5AEF14}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{2B1052B1-FE9F-46BB-A9DA-B402111B7127}"
 	ProjectSection(SolutionItems) = preProject
