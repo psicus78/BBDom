@@ -10,7 +10,6 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace BBDom.Test.ConsoleApp.DotNetCore
@@ -27,6 +26,17 @@ namespace BBDom.Test.ConsoleApp.DotNetCore
 
         static void Main(string[] args)
         {
+
+            //try
+            //{
+            //    log4net.Config.XmlConfigurator.Configure();
+            //}
+            //catch (Exception) { }
+
+            //var knx = new BBDom.Biz.DotNet.Knx();
+
+            //knx.Test();
+
             try
             {
                 var logRepository = LogManager.GetRepository(Assembly.GetEntryAssembly());
@@ -46,7 +56,7 @@ namespace BBDom.Test.ConsoleApp.DotNetCore
             _connection.KnxConnectedDelegate += Connected;
             _connection.KnxStatusDelegate += Status;
             _connection.KnxEventDelegate += Event;
-            
+
             #region Never ending loop
             Task.Run(() =>
             {
@@ -60,11 +70,12 @@ namespace BBDom.Test.ConsoleApp.DotNetCore
                     if (!_connected)
                     {
                         InitGroups();
+
+                        Console.Out.WriteLine("Connecting");
                         _connection.Connect();
-                        Task.Run(() =>
-                        {
-                            Thread.Sleep(5000);
-                        }).Wait();
+                        Task.Delay(5000).GetAwaiter().GetResult();
+
+                        //StartupCaldaia();
 
                         //var readOnlyGroupAddresses = Groups.Values.Where(g => g.Direction == KnxGroupDirection.OUTPUT).Select(g => g.Address).ToList();
                         //foreach (var readOnlyGroupAddress in readOnlyGroupAddresses)
@@ -81,18 +92,6 @@ namespace BBDom.Test.ConsoleApp.DotNetCore
                         //}
                     }
 
-                    //if (doAction)
-                    //{
-                    //    _connection.Action(address, state);
-                    //    Task.Run(() =>
-                    //    {
-                    //        Thread.Sleep(5000);
-                    //    }).Wait();
-
-                    //    state = !state;
-                    //}
-
-                    
                     var cmd = PrintCommands();
                     switch (cmd)
                     {
@@ -143,17 +142,15 @@ namespace BBDom.Test.ConsoleApp.DotNetCore
                             break;
                     }
 
-                    Thread.Sleep(3000);
+                    Task.Delay(3000).GetAwaiter().GetResult();
                 }
             }).Wait();
             #endregion
 
             #region Disconnessione
             _connection.Disconnect();
-            Task.Run(() =>
-            {
-                Thread.Sleep(10000);
-            }).Wait();
+
+            Task.Delay(10000).GetAwaiter().GetResult();
             #endregion
 
         }
@@ -218,7 +215,7 @@ namespace BBDom.Test.ConsoleApp.DotNetCore
                         Console.Write("5..28: ");
                         var tempString = Console.In.ReadLine();
                         double tempState;
-                        if (double.TryParse(tempString, NumberStyles.Any, CultureInfo.InvariantCulture, out tempState) && (tempState >= 5 && tempState <= 28))
+                        if (double.TryParse(tempString, NumberStyles.Any, CultureInfo.InvariantCulture, out tempState))
                         {
                             _connection.Action(group.Address, _connection.ToDataPoint(KnxDPT.KnxDPTs[KnxDPTEnum.TEMPERATURE], tempString));
                         }
@@ -372,12 +369,12 @@ namespace BBDom.Test.ConsoleApp.DotNetCore
 
         static void Connected()
         {
-            Logger.Info("Connected");
+            Console.Out.WriteLine("Connected");
             _connected = true;
         }
         static void Disconnected()
         {
-            Logger.Info("Disconnected");
+            Console.Out.WriteLine("Disconnected");
             _connected = false;
         }
 
@@ -500,20 +497,24 @@ namespace BBDom.Test.ConsoleApp.DotNetCore
 
         private static void DoSonno()
         {
+            _connection.Action("1/1/1", true);
+            Task.Delay(200).GetAwaiter().GetResult();
+            _connection.Action("1/1/2", true);
+            Task.Delay(200).GetAwaiter().GetResult();
             _connection.Action("1/1/3", true);
-            Thread.Sleep(200);
+            Task.Delay(200).GetAwaiter().GetResult();
             _connection.Action("1/1/4", true);
-            Thread.Sleep(200);
+            Task.Delay(200).GetAwaiter().GetResult();
             _connection.Action("1/1/5", true);
-            Thread.Sleep(200);
+            Task.Delay(200).GetAwaiter().GetResult();
             _connection.Action("1/1/6", true);
-            Thread.Sleep(200);
+            Task.Delay(200).GetAwaiter().GetResult();
             _connection.Action("1/1/7", true);
-            Thread.Sleep(200);
+            Task.Delay(200).GetAwaiter().GetResult();
             _connection.Action("1/1/8", true);
-            Thread.Sleep(200);
+            Task.Delay(200).GetAwaiter().GetResult();
             _connection.Action("1/1/9", true);
-            Thread.Sleep(200);
+            Task.Delay(200).GetAwaiter().GetResult();
             _connection.Action("1/1/10", true);
         }
 
@@ -521,74 +522,85 @@ namespace BBDom.Test.ConsoleApp.DotNetCore
         {
             //G1,G2,G3 = P1
             _connection.Action("1/7/1", true);
-            Thread.Sleep(200);
+             Task.Delay(200).GetAwaiter().GetResult();
             _connection.Action("1/7/2", true);
-            Thread.Sleep(200);
+             Task.Delay(200).GetAwaiter().GetResult();
             _connection.Action("1/7/3", true);
-            Thread.Sleep(200);
+             Task.Delay(200).GetAwaiter().GetResult();
             _connection.Action("1/7/4", true);
-            Thread.Sleep(200);
+             Task.Delay(200).GetAwaiter().GetResult();
             _connection.Action("1/7/5", true);
-            Thread.Sleep(200);
+             Task.Delay(200).GetAwaiter().GetResult();
             _connection.Action("1/7/6", true);
-            Thread.Sleep(200);
+             Task.Delay(200).GetAwaiter().GetResult();
             _connection.Action("1/7/7", true);
-            Thread.Sleep(200);
+             Task.Delay(200).GetAwaiter().GetResult();
             _connection.Action("1/7/8", true);
-            Thread.Sleep(200);
+             Task.Delay(200).GetAwaiter().GetResult();
             _connection.Action("1/1/9", false);
-            Thread.Sleep(200);
+             Task.Delay(200).GetAwaiter().GetResult();
             _connection.Action("1/7/10", true);
-            Thread.Sleep(200);
+             Task.Delay(200).GetAwaiter().GetResult();
         }
 
         private static void DoUscitaCasaGiorno()
         {
             //G1,G2,G3 = P0
             _connection.Action("1/6/1", true);
-            Thread.Sleep(200);
+             Task.Delay(200).GetAwaiter().GetResult();
             _connection.Action("1/6/2", true);
-            Thread.Sleep(200);
+             Task.Delay(200).GetAwaiter().GetResult();
             _connection.Action("1/6/3", true);
-            Thread.Sleep(200);
+             Task.Delay(200).GetAwaiter().GetResult();
             _connection.Action("1/6/4", true);
-            Thread.Sleep(200);
+             Task.Delay(200).GetAwaiter().GetResult();
             _connection.Action("1/6/5", true);
-            Thread.Sleep(200);
+             Task.Delay(200).GetAwaiter().GetResult();
             _connection.Action("1/6/6", true);
-            Thread.Sleep(200);
+             Task.Delay(200).GetAwaiter().GetResult();
             _connection.Action("1/6/7", true);
-            Thread.Sleep(200);
+             Task.Delay(200).GetAwaiter().GetResult();
             _connection.Action("1/6/8", true);
-            Thread.Sleep(200);
+             Task.Delay(200).GetAwaiter().GetResult();
             _connection.Action("1/6/9", true);
-            Thread.Sleep(200);
+             Task.Delay(200).GetAwaiter().GetResult();
             _connection.Action("1/6/10", true);
         }
 
         private static void DoUscitaCasaNotte()
         {
             //G1,G3 = 0%, G2 = P0
-            _connection.Action("1/6/1", true);
-            Thread.Sleep(200);
-            _connection.Action("1/6/2", true);
-            Thread.Sleep(200);
-
+            _connection.Action("1/1/1", true);
+             Task.Delay(200).GetAwaiter().GetResult();
+            _connection.Action("1/1/2", true);
+             Task.Delay(200).GetAwaiter().GetResult();
             _connection.Action("1/1/3", true);
-            Thread.Sleep(200);
+             Task.Delay(200).GetAwaiter().GetResult();
             _connection.Action("1/1/4", true);
-            Thread.Sleep(200);
+             Task.Delay(200).GetAwaiter().GetResult();
             _connection.Action("1/1/5", true);
-            Thread.Sleep(200);
+             Task.Delay(200).GetAwaiter().GetResult();
             _connection.Action("1/1/6", true);
-            Thread.Sleep(200);
+             Task.Delay(200).GetAwaiter().GetResult();
             _connection.Action("1/1/7", true);
-            Thread.Sleep(200);
+             Task.Delay(200).GetAwaiter().GetResult();
             _connection.Action("1/1/8", true);
-            Thread.Sleep(200);
+             Task.Delay(200).GetAwaiter().GetResult();
             _connection.Action("1/1/9", true);
-            Thread.Sleep(200);
+             Task.Delay(200).GetAwaiter().GetResult();
             _connection.Action("1/1/10", true);
+        }
+
+        private static void StartupCaldaia()
+        {
+            //set stato caldaia a on e poi off, perché quando si riavvia l'impianto elettrico lo switch non funziona,
+            //inoltre, se dovesse capitare un black-out elettrico con la caldaia a on al ritorno della corrente quest'ultima resterebbe accesa
+            Console.Out.WriteLine("StartupCaldaia, on, lascio accesa per 30 secondi, per non accendere e spegnere troppo in fretta...");
+            _connection.Action("2/0/1", true);
+            Task.Delay(30000).GetAwaiter().GetResult();
+            Console.Out.WriteLine("StartupCaldaia, off");
+            _connection.Action("2/0/1", false);
+             Task.Delay(200).GetAwaiter().GetResult();
         }
 
         private static void LogValue(KnxGroupWithStateDto knxGroup, string state, bool isEvent)
