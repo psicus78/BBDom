@@ -7,8 +7,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BBDom.Biz.DotNet", "BBDom.B
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Test", "Test", "{FA0645C0-184D-4699-A020-47B21FCC557D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KNXLib", "..\knx.net\src\KNXLib\KNXLib.csproj", "{CD1911AD-1967-40CB-A1C3-EC2FA562872B}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BBDom.Data", "BBDom.Data\BBDom.Data.csproj", "{1F321AF5-831D-4CCE-8897-C6AFECE9223E}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BBDom.Web", "BBDom.Web\BBDom.Web.csproj", "{9746696C-356F-4F1D-BAC6-11785F5AEF14}"
@@ -17,6 +15,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		Migrations_how_to.txt = Migrations_how_to.txt
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KNXLib", "KNXLib\KNXLib.csproj", "{CD1911AD-1967-40CB-A1C3-EC2FA562872B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -28,10 +28,6 @@ Global
 		{4C612B12-A3D4-4CC0-A863-796EFAA8738E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4C612B12-A3D4-4CC0-A863-796EFAA8738E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4C612B12-A3D4-4CC0-A863-796EFAA8738E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{CD1911AD-1967-40CB-A1C3-EC2FA562872B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{CD1911AD-1967-40CB-A1C3-EC2FA562872B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{CD1911AD-1967-40CB-A1C3-EC2FA562872B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{CD1911AD-1967-40CB-A1C3-EC2FA562872B}.Release|Any CPU.Build.0 = Release|Any CPU
 		{1F321AF5-831D-4CCE-8897-C6AFECE9223E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{1F321AF5-831D-4CCE-8897-C6AFECE9223E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1F321AF5-831D-4CCE-8897-C6AFECE9223E}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -40,12 +36,13 @@ Global
 		{9746696C-356F-4F1D-BAC6-11785F5AEF14}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9746696C-356F-4F1D-BAC6-11785F5AEF14}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9746696C-356F-4F1D-BAC6-11785F5AEF14}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CD1911AD-1967-40CB-A1C3-EC2FA562872B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CD1911AD-1967-40CB-A1C3-EC2FA562872B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CD1911AD-1967-40CB-A1C3-EC2FA562872B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CD1911AD-1967-40CB-A1C3-EC2FA562872B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{9746696C-356F-4F1D-BAC6-11785F5AEF14} = {FA0645C0-184D-4699-A020-47B21FCC557D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {93EECC52-CFB6-454A-AC1B-9EE91F472829}
