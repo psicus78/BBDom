@@ -1,6 +1,10 @@
 ﻿using BBDom.Data;
 using BBDom.Data.Dtos;
 using BBDom.Data.Models;
+using Ical.Net;
+using Ical.Net.CalendarComponents;
+using Ical.Net.DataTypes;
+using Ical.Net.Serialization;
 using KNXLib;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -16,7 +20,7 @@ namespace BBDom.Web
     {
 
         private readonly ILogger<KnxConnectionManager> _logger;
-        private readonly IServiceProvider _serviceProvider;
+        private readonly System.IServiceProvider _serviceProvider;
         private KnxConnection _connection;
         private bool _connected = false;
         private bool _run = false;
@@ -24,7 +28,7 @@ namespace BBDom.Web
 
         Dictionary<string, KnxGroupWithStateDto> Groups = new Dictionary<string, KnxGroupWithStateDto>();
 
-        public KnxConnectionManager(ILogger<KnxConnectionManager> logger, IServiceProvider serviceProvider)
+        public KnxConnectionManager(ILogger<KnxConnectionManager> logger, System.IServiceProvider serviceProvider)
         {
             _logger = logger;
             _serviceProvider = serviceProvider;
@@ -61,6 +65,114 @@ namespace BBDom.Web
                 //var address = "0/0/1";
                 //var state = true;
 
+                //Repeat daily
+                var rrule = new RecurrencePattern(FrequencyType.Daily, 1);
+                double offsetOn = 1; //SP should become 21
+                double offsetOff = -2; //SP should become 18
+                var calendar = new Ical.Net.Calendar();
+                List<MyCalendarEvent> myCalendarEvents = new List<MyCalendarEvent>();
+                //on
+                var e_17__18_30 = new MyCalendarEvent
+                {
+                    Start = new CalDateTime(new DateTime(2021, 1, 4, 17, 0, 0)),
+                    End = new CalDateTime(new DateTime(2021, 1, 4, 18, 30, 0)),
+                    RecurrenceRules = new List<RecurrencePattern> { rrule },
+                    Offset = offsetOn,
+                };
+                calendar.Events.Add(e_17__18_30);
+                myCalendarEvents.Add(e_17__18_30);
+                //off
+                var e_18_30__20_30 = new MyCalendarEvent
+                {
+                    Start = new CalDateTime(new DateTime(2021, 1, 4, 18, 30, 0)),
+                    End = new CalDateTime(new DateTime(2021, 1, 4, 20, 30, 0)),
+                    RecurrenceRules = new List<RecurrencePattern> { rrule },
+                    Offset = offsetOff,
+                };
+                calendar.Events.Add(e_18_30__20_30);
+                myCalendarEvents.Add(e_18_30__20_30);
+                //on
+                var e_20_30__22 = new MyCalendarEvent
+                {
+                    Start = new CalDateTime(new DateTime(2021, 1, 4, 20, 30, 0)),
+                    End = new CalDateTime(new DateTime(2021, 1, 4, 22, 0, 0)),
+                    RecurrenceRules = new List<RecurrencePattern> { rrule },
+                    Offset = offsetOn,
+                };
+                calendar.Events.Add(e_20_30__22);
+                myCalendarEvents.Add(e_20_30__22);
+                //off
+                var e_22__00 = new MyCalendarEvent
+                {
+                    Start = new CalDateTime(new DateTime(2021, 1, 4, 22, 0, 0)),
+                    End = new CalDateTime(new DateTime(2021, 1, 5, 0, 0, 0)),
+                    RecurrenceRules = new List<RecurrencePattern> { rrule },
+                    Offset = offsetOff,
+                };
+                calendar.Events.Add(e_22__00);
+                myCalendarEvents.Add(e_22__00);
+                //off
+                var e_00__6_30 = new MyCalendarEvent
+                {
+                    Start = new CalDateTime(new DateTime(2021, 1, 4, 0, 0, 0)),
+                    End = new CalDateTime(new DateTime(2021, 1, 4, 6, 30, 0)),
+                    RecurrenceRules = new List<RecurrencePattern> { rrule },
+                    Offset = offsetOff,
+                };
+                calendar.Events.Add(e_00__6_30);
+                myCalendarEvents.Add(e_00__6_30);
+                //on
+                var e_6_30__9 = new MyCalendarEvent
+                {
+                    Start = new CalDateTime(new DateTime(2021, 1, 4, 6, 30, 0)),
+                    End = new CalDateTime(new DateTime(2021, 1, 4, 9, 0, 0)),
+                    RecurrenceRules = new List<RecurrencePattern> { rrule },
+                    Offset = offsetOn,
+                };
+                calendar.Events.Add(e_6_30__9);
+                myCalendarEvents.Add(e_6_30__9);
+                //off
+                var e_9__12 = new MyCalendarEvent
+                {
+                    Start = new CalDateTime(new DateTime(2021, 1, 4, 9, 0, 0)),
+                    End = new CalDateTime(new DateTime(2021, 1, 4, 12, 0, 0)),
+                    RecurrenceRules = new List<RecurrencePattern> { rrule },
+                    Offset = offsetOff,
+                };
+                calendar.Events.Add(e_9__12);
+                myCalendarEvents.Add(e_9__12);
+                //on
+                var e_12__14 = new MyCalendarEvent
+                {
+                    Start = new CalDateTime(new DateTime(2021, 1, 4, 12, 0, 0)),
+                    End = new CalDateTime(new DateTime(2021, 1, 4, 14, 0, 0)),
+                    RecurrenceRules = new List<RecurrencePattern> { rrule },
+                    Offset = offsetOn,
+                };
+                calendar.Events.Add(e_12__14);
+                myCalendarEvents.Add(e_12__14);
+                //off
+                var e_14__17 = new MyCalendarEvent
+                {
+                    Start = new CalDateTime(new DateTime(2021, 1, 4, 14, 0, 0)),
+                    End = new CalDateTime(new DateTime(2021, 1, 4, 17, 0, 0)),
+                    RecurrenceRules = new List<RecurrencePattern> { rrule },
+                    Offset = offsetOff,
+                };
+                calendar.Events.Add(e_14__17);
+                myCalendarEvents.Add(e_14__17);
+
+                var serializer = new CalendarSerializer();
+                var serializedCalendar = serializer.SerializeToString(calendar);
+
+                var searchStart = DateTime.Now.Date;
+                var searchEnd = searchStart.AddDays(1);
+                List<EventOccurrency> events = GetEventOccurrencies(myCalendarEvents, calendar, searchStart, searchEnd);
+                foreach (var myEvent in events)
+                {
+                    _logger.LogInformation("Event: {0} - {1}, offset: {2}", myEvent.Start, myEvent.End, myEvent.Offset);
+                }
+                EventOccurrency currentEvent = null;
                 while (_run)
                 {
                     if (!_connected)
@@ -86,64 +198,90 @@ namespace BBDom.Web
                         //        Thread.Sleep(1000);
                         //    }).Wait();
                         //}
+                        //_connection.Action("2/1/11", true);
+                        //Task.Delay(2000).GetAwaiter().GetResult();
+                        //_connection.RequestStatus("2/1/11");
+                        //if (_connected)
+                        //{
+                        //    var dpValue = _connection.ToDataPoint(KnxDPT.KnxDPTs[KnxDPTEnum.HVAC], "3");
+                        //    _connection.Action("2/1/4", dpValue);
+                        //    var dpTempValue = _connection.ToDataPoint(KnxDPT.KnxDPTs[KnxDPTEnum.TEMPERATURE], "1");
+                        //    _connection.Action("2/1/13", dpTempValue);
+                        //    var _2_1_xAddresses = Groups.Values.Where(v => v.Address.StartsWith("2/1/")).ToList();
+                        //    foreach (var _2_1_xAddress in _2_1_xAddresses)
+                        //    {
+                        //        _connection.RequestStatus(_2_1_xAddress.Address);
+                        //        Task.Delay(200).GetAwaiter().GetResult();
+                        //    }
+                        //    //Task.Delay(2000).GetAwaiter().GetResult();
+                        //    //_connection.RequestStatus("2/1/4");
+                        //}
                     }
 
-                    //var cmd = PrintCommands();
-                    //switch (cmd)
-                    //{
-                    //    case "1":
-                    //        {
-                    //            var address = PrintRequestReadAddress();
-                    //            if (Groups.ContainsKey(address))
-                    //            {
-                    //                var group = Groups[address];
-                    //                if (!group.Read)
-                    //                {
-                    //                    Console.Out.WriteLine("Indirizzo non valido");
-                    //                }
-                    //                else
-                    //                {
-                    //                    _connection.RequestStatus(address);
-                    //                }
-                    //            }
-                    //            else
-                    //            {
-                    //                Console.Out.WriteLine("Indirizzo non valido");
-                    //            }
-                    //        }
-                    //        break;
-                    //    case "2":
-                    //        {
-                    //            var address = PrintRequestWriteAddress();
-                    //            if (Groups.ContainsKey(address))
-                    //            {
-                    //                var group = Groups[address];
-                    //                if (!group.Write)
-                    //                {
-                    //                    Console.Out.WriteLine("Indirizzo non valido");
-                    //                }
-                    //                else
-                    //                {
-                    //                    RequestStateChange(group);
-                    //                }
-                    //            }
-                    //            else
-                    //            {
-                    //                Console.Out.WriteLine("Indirizzo non valido");
-                    //            }
-                    //        }
-                    //        break;
-                    //    case "99":
-                    //        _run = false;
-                    //        break;
-                    //}
+                    var now = DateTime.Now;
 
+                    if (now >= searchEnd)
+                    {
+                        searchStart = now.Date;
+                        searchEnd = searchStart.AddDays(1);
+                        _logger.LogInformation("Changing day: {0} - {1}", searchStart, searchEnd);
+                        events = GetEventOccurrencies(myCalendarEvents, calendar, searchStart, searchEnd);
+                        foreach (var myEvent in events)
+                        {
+                            _logger.LogInformation("Event: {0} - {1}, offset: {2}", myEvent.Start, myEvent.End, myEvent.Offset);
+                        }
+                    }
+                    //now < searchEnd
+                    else if (currentEvent == null || currentEvent.End <= now)
+                    {
+                        _logger.LogInformation("Set current event: {0}", now);
+                        events.RemoveAll(e => e.End <= now);
+                        if (events.Any())
+                        {
+                            currentEvent = events.OrderBy(e => e.Start).First();
+                            _logger.LogInformation("Event: {0} - {1}, offset: {2}", currentEvent.Start, currentEvent.End, currentEvent.Offset);
+                            var offsetString = currentEvent.Offset.ToString(CultureInfo.InvariantCulture);
+                            var dpTempValue = _connection.ToDataPoint(KnxDPT.KnxDPTs[KnxDPTEnum.TEMPERATURE], offsetString);
+                            _connection.Action("2/1/13", dpTempValue);
+                            Task.Delay(200).GetAwaiter().GetResult();
+                            _connection.Action("2/2/13", dpTempValue);
+                            Task.Delay(200).GetAwaiter().GetResult();
+                            _connection.Action("2/3/13", dpTempValue);
+                            Task.Delay(200).GetAwaiter().GetResult();
+                            _connection.Action("2/4/13", dpTempValue);
+                            Task.Delay(200).GetAwaiter().GetResult();
+                            _connection.Action("2/5/13", dpTempValue);
+                            Task.Delay(200).GetAwaiter().GetResult();
+                            _connection.Action("2/6/13", dpTempValue);
+                            Task.Delay(200).GetAwaiter().GetResult();
+                        }
+                    }
                     Task.Delay(100).GetAwaiter().GetResult();
                 }
 
             });
             #endregion
 
+        }
+
+        private List<EventOccurrency> GetEventOccurrencies(List<MyCalendarEvent> myCalendarEvents, Ical.Net.Calendar calendar, DateTime searchStart, DateTime searchEnd)
+        {
+            var occurrencies = calendar.GetOccurrences(searchStart, searchEnd);
+            var events = new List<EventOccurrency>();
+            foreach (var occurrency in occurrencies)
+            {
+                var myCalendarEvent = myCalendarEvents.FirstOrDefault(e => e.Start.Value.TimeOfDay == occurrency.Period.StartTime.Value.TimeOfDay);
+                if (myCalendarEvent != null)
+                {
+                    events.Add(new EventOccurrency
+                    {
+                        Offset = myCalendarEvent.Offset,
+                        Start = occurrency.Period.StartTime.Value,
+                        End = occurrency.Period.EndTime.Value,
+                    });
+                }
+            }
+            return events.OrderBy(e => e.Start).ToList();
         }
 
         public void Shutdown()
@@ -695,6 +833,11 @@ namespace BBDom.Web
                                 break;
                         }
                         break;
+                    case KnxDPTEnum.HEAT_COOL:
+                        bool heatCoolVal = (bool)_connection.FromDataPoint(KnxDPT.KnxDPTs[KnxDPTEnum.HEAT_COOL], state);
+                        knxGroup.State = heatCoolVal ? 1 : 0;
+                        stringFormat = string.Format("knxGroup {0}, openClose: {1}", knxGroup.Name, heatCoolVal ? "heating" : "cooling");
+                        break;
                     default:
                         stringFormat = string.Format("New {0}: knxGroup {1} has state {2}", isEvent ? "Event" : "Status", knxGroup.Address, state);
                         break;
@@ -705,4 +848,19 @@ namespace BBDom.Web
         }
 
     }
+
+    public class MyCalendarEvent : CalendarEvent
+    {
+        public double Offset { get; set; }
+
+    }
+
+    public class EventOccurrency
+    {
+        public DateTime Start { get; set; }
+        public DateTime End { get; set; }
+        public double Offset { get; set; }
+
+    }
 }
+

@@ -50,5 +50,11 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\KNXLib\KNXLib.csproj">
+      <Project>{cd1911ad-1967-40cb-a1c3-ec2fa562872b}</Project>
+      <Name>KNXLib</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

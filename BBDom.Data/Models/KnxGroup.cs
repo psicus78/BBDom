@@ -25,7 +25,14 @@ namespace BBDom.Data.Models
         COUNTER_PULSES = 5, //0..255
         DIMMING_CONTROL = 6, //-7..7
         BOOLEAN = 7, //1.002
-        HVAC = 8, //20.102
+        /// <summary>
+        /// 20.102 0 = Not used, 1 = Comfort, 2 = Precomfort (Standby), 3 = Economy, 4 = Protection (BldgProtect)
+        /// </summary>
+        HVAC = 8,
+        /// <summary>
+        /// 1.100 0 = cooling, 1 = heating
+        /// </summary>
+        HEAT_COOL = 9,
     }
 
     public static class KnxDPT
@@ -41,6 +48,7 @@ namespace BBDom.Data.Models
             new KeyValuePair<KnxDPTEnum, string>(KnxDPTEnum.COUNTER_PULSES, "5.010"),
             new KeyValuePair<KnxDPTEnum, string>(KnxDPTEnum.DIMMING_CONTROL, "3.007"),
             new KeyValuePair<KnxDPTEnum, string>(KnxDPTEnum.HVAC, "20.102"),
+            new KeyValuePair<KnxDPTEnum, string>(KnxDPTEnum.HEAT_COOL, "1.100"),
         };
 
         public static Dictionary<KnxDPTEnum, string> KnxDPTs = new Dictionary<KnxDPTEnum, string>(TypesList);
