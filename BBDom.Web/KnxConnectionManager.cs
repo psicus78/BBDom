@@ -67,7 +67,7 @@ namespace BBDom.Web
 
                 //Repeat daily
                 var rrule = new RecurrencePattern(FrequencyType.Daily, 1);
-                double offsetOn = 1; //SP should become 21
+                double offsetOn = 0.5; //SP should become 20.5
                 double offsetOff = -2; //SP should become 18
                 var calendar = new Ical.Net.Calendar();
                 List<MyCalendarEvent> myCalendarEvents = new List<MyCalendarEvent>();
@@ -183,7 +183,7 @@ namespace BBDom.Web
                         _connection.Connect();
                         Task.Delay(5000).GetAwaiter().GetResult();
 
-                        //StartupCaldaia();
+                        StartupCaldaia();
 
                         //var readOnlyGroupAddresses = Groups.Values.Where(g => g.Direction == KnxGroupDirection.OUTPUT).Select(g => g.Address).ToList();
                         //foreach (var readOnlyGroupAddress in readOnlyGroupAddresses)
